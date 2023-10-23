@@ -1,6 +1,11 @@
-# UOCIS322 - Project 3 #
+# UOCIS322 - Project 3 
 
 You'll learn about JQuery and asynchronous requests in this project.
+
+
+Dashiell Kim Project-3: A simple anagram game
+
+	Utilizes JQuery and Ajax to create an anagram game
 
 ## Overview
 
