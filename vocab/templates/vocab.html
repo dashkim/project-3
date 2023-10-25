@@ -73,31 +73,79 @@
          <br />
          <div class="row">
             <div class="col-xs-6 text-center">
-               <form id="entry" method="POST" action="/_check">
+               <form id="entry">
                   <label for="attempt">Word:</label>
                   <input id="attempt" name="attempt" type="text" width="15"
                      autocomplete="off"  autofocus />
-                  <input type="submit" name="try" />
+                  <!-- <input type="submit" name="try" /> -->
                </form>
             </div>
          </div>
          <br />
-         {% if session.matches|length is not equalto 0  %}
-         <h2>You found </h2>
-         <p id="results">
-            {% for match in session.matches %}
-            {{ match }}
-            {% endfor %}
-         </p>
-         {% endif %}
-         {% with messages = get_flashed_messages() %}
-         {% if messages %}
-         <!-- Mismatch, already found, etc. "flashed" from Python -->
-         {% for message in messages %}
-         <p class="message">{{ message }}</p>
-         {% endfor %}
-         {% endif %}
-         {% endwith %}
+         
+         <h2 id="foundText"></h2>
+         <p id="results"></p>
+         <p class="message" id="messages"></p>
+		 
+         <script>
+            $(document).ready(function() {
+                // Prevent normal form submission
+                $("#entry").submit(function(event) {
+                    event.preventDefault();
+                });
+        
+                // Cache DOM elements
+                var $attemptInput = $("#attempt");
+                var $foundText = $("#foundText");
+                var $results = $("#results");
+                var $messages = $("#messages");
+        
+                // Store matches to send back when checking a word
+                var words = [];
+        
+                // Function to update the results and messages
+                function updateResults(matches, messages) {
+                    if (matches.length === 0) {
+                        $foundText.html("");
+                        $results.html("");
+                        $messages.html("");
+                    }
+        
+                    if (matches.length > 0) {
+                        $foundText.html("You found ");
+                    }
+        
+                    var resultsText = matches.join("\n");
+                    var messagesText = messages.join("\n");
+        
+                    $results.html(resultsText);
+                    $messages.html(messagesText);
+                }
+                $attemptInput.on("keyup", function() {
+                    var txt = $attemptInput.val();
+                    var keycode = event.which;
+                    var letter = String.fromCharCode(keycode);
+
+                    if (!/^[a-zA-Z]$/.test(letter)) {
+                        return;
+                    }
+        
+                    $.getJSON("/_check", { word: txt, matches: words }, function(data) {
+                        var matches = data.result.matches;
+                        var messages = data.result.messages;
+                        var success = data.result.success;
+        
+                        updateResults(matches, messages);
+                        words = matches;
+        
+                        if (success) {
+                            window.location.replace("/success");
+                        }
+                    });
+                });
+            });
+        </script>
+        
       </div>
       <!-- container -->
    </body>
